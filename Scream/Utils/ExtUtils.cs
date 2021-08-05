@@ -241,7 +241,7 @@ namespace Scream
                 runKey.Close();
                 foreach (string item in runList)
                 {
-                    if (item.Equals("V2RayW"))
+                    if (item.Equals("Scream"))
                         return true;
                 }
                 return false;
