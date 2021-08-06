@@ -798,7 +798,7 @@ namespace Scream
             {
                 var newOutboundItem = new MenuItem
                 {
-                    Header = cusConfigFileName.Replace("_", "__"),
+                    Header = "_" + cusConfigFileName.Replace("_", "__"),
                     IsChecked = useCusProfile && cusConfigFileName == selectedCusConfig,
                     Tag = useCusConfigTag
                 };
@@ -841,7 +841,7 @@ namespace Scream
                 useMultipleServer = false;
                 useCusProfile = true;
                 usePartServer = false;
-                selectedCusConfig = ((sender as MenuItem).Header as string).Substring(1);
+                selectedCusConfig = ((sender as MenuItem).Header as string).Substring(1).Replace("__", "_");
             }
             else if (senderTag == useAllServerTag)
             {
@@ -1107,7 +1107,7 @@ namespace Scream
             Debug.WriteLine($"{sender} calls config change");
             if (proxyState == true)
             {
-                if (!useMultipleServer && useCusProfile)
+                if (!useMultipleServer && !usePartServer && useCusProfile)
                 {
                     v2rayJsonConfig = File.ReadAllBytes(AppDomain.CurrentDomain.BaseDirectory + @"config\" + selectedCusConfig);
                 }
