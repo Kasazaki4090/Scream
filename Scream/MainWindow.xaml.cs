@@ -66,6 +66,7 @@ namespace Scream
 
         private FileSystemWatcher pacFileWatcher;
         private FileSystemWatcher cusFileWatcher;
+        private FileSystemWatcher confdirFileWatcher;
         public MainWindow()
         {
             SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
@@ -119,6 +120,23 @@ namespace Scream
                 Dispatcher.Invoke(() => { UpdateServerMenuList(speedTestResultDic); });
             };
             cusFileWatcher.EnableRaisingEvents = true;
+            confdirFileWatcher = new FileSystemWatcher(AppDomain.CurrentDomain.BaseDirectory + @"config\confdir\", "*.json");
+            confdirFileWatcher.Deleted += (object source, FileSystemEventArgs e) =>
+            {
+                Dispatcher.Invoke(() => { CoreConfigChanged(this); });
+                Debug.WriteLine($"confdir config deleted: {e.FullPath}");
+            };
+            confdirFileWatcher.Created += ConfdirFileWatcher_Changed;
+            confdirFileWatcher.Changed += ConfdirFileWatcher_Changed;
+            confdirFileWatcher.Renamed += (object sender, RenamedEventArgs e) =>
+            {
+                if (e.Name.Substring(e.Name.LastIndexOf(".") + 1) == "json")
+                {
+                    Dispatcher.Invoke(() => { ConfdirFileWatcher_Changed(sender, e); });
+                }
+
+            };
+            confdirFileWatcher.EnableRaisingEvents = true;
             //OverallChanged(this, null);
 
             Outbounds outbounds = new Outbounds { mainWindow = this };
@@ -250,7 +268,7 @@ namespace Scream
         {
             #region pac, config, log dir 
             string currentDir = AppDomain.CurrentDomain.BaseDirectory;
-            foreach (string folder in new string[] { @"pac\", @"config\", @"config\" })
+            foreach (string folder in new string[] { @"pac\", @"config\", @"config\confdir\" })
             {
                 if (!Directory.Exists(currentDir + folder))
                 {
@@ -638,6 +656,44 @@ namespace Scream
         private const int useCusConfigTag = -11;
         private bool speedtestState = true;
         private BackgroundWorker configScanner = new BackgroundWorker();
+        private void ConfdirFileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (confdirFileWatcher != null)
+            {
+                confdirFileWatcher.EnableRaisingEvents = false;
+                Thread th = new Thread(new ThreadStart(
+                delegate ()
+                {
+                    Thread.Sleep(3000);
+                    Process v2rayProcess = new Process();
+                    v2rayProcess.StartInfo.FileName = Utilities.corePath;
+                    DirectoryInfo confdirDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\confdir\");
+                    var Configs = confdirDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
+                    foreach (var conf in Configs)
+                    {
+                        Debug.WriteLine(v2rayProcess.StartInfo.FileName);
+                        v2rayProcess.StartInfo.Arguments = "-test -config " + "\"" + conf.FullName + "\"";
+                        v2rayProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        try
+                        {
+                            v2rayProcess.Start();
+                            v2rayProcess.WaitForExit();
+                            Debug.WriteLine("exit code is " + v2rayProcess.ExitCode.ToString());
+                            if (v2rayProcess.ExitCode != 0)
+                            {
+                                File.Move(conf.FullName, string.Format(@"{0}.error", conf.FullName));
+                            }
+                        }
+                        catch { };
+                        Debug.WriteLine($"confdir config changed: {e.FullPath}");
+                    }
+                    Dispatcher.Invoke(() => { CoreConfigChanged(this); });
+                    confdirFileWatcher.EnableRaisingEvents = true;
+                }
+                ));
+                th.Start();
+            }
+        }
         private void CusFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (cusFileWatcher != null)
@@ -715,6 +771,26 @@ namespace Scream
                 }
                 catch { };
             }
+            DirectoryInfo confdirDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\confdir\");
+            var Configs = confdirDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
+            foreach (var conf in Configs)
+            {
+                Debug.WriteLine(v2rayProcess.StartInfo.FileName);
+                v2rayProcess.StartInfo.Arguments = "-test -config " + "\"" + conf.FullName + "\"";
+                v2rayProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                try
+                {
+                    v2rayProcess.Start();
+                    v2rayProcess.WaitForExit();
+                    Debug.WriteLine("exit code is " + v2rayProcess.ExitCode.ToString());
+                    if (v2rayProcess.ExitCode != 0)
+                    {
+                        File.Move(conf.FullName, string.Format(@"{0}.error", conf.FullName));
+                    }
+                }
+                catch { };
+            }
+            Dispatcher.Invoke(() => { CoreConfigChanged(this); });
         }
 
         private void UpdateServerMenuList(Dictionary<string, string> responseTime)
@@ -1050,7 +1126,7 @@ namespace Scream
             v2rayProcess = new System.Diagnostics.Process();
             v2rayProcess.StartInfo.FileName = Utilities.corePath;
             Debug.WriteLine(v2rayProcess.StartInfo.FileName);
-            v2rayProcess.StartInfo.Arguments = @"-config http://127.0.0.1:18000/config.json";
+            v2rayProcess.StartInfo.Arguments = @"-config http://127.0.0.1:18000/config.json" + string.Format(@" -confdir {0}\config\confdir", AppDomain.CurrentDomain.BaseDirectory);
 #if DEBUG
             v2rayProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 #else
