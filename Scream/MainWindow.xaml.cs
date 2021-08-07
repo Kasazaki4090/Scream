@@ -116,8 +116,11 @@ namespace Scream
             cusFileWatcher.Renamed += (object sender, RenamedEventArgs e) =>
             {
                 cusProfiles.Remove(e.OldName);
-                cusProfiles.Add(e.Name);
                 Dispatcher.Invoke(() => { UpdateServerMenuList(speedTestResultDic); });
+                if (e.Name.Substring(e.Name.LastIndexOf(".") + 1) == "json")
+                {
+                    Dispatcher.Invoke(() => { CusFileWatcher_Changed(sender, e); });
+                }
             };
             cusFileWatcher.EnableRaisingEvents = true;
             confdirFileWatcher = new FileSystemWatcher(AppDomain.CurrentDomain.BaseDirectory + @"config\confdir\", "*.json");
@@ -134,7 +137,6 @@ namespace Scream
                 {
                     Dispatcher.Invoke(() => { ConfdirFileWatcher_Changed(sender, e); });
                 }
-
             };
             confdirFileWatcher.EnableRaisingEvents = true;
             //OverallChanged(this, null);
