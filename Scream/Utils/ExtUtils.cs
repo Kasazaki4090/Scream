@@ -98,7 +98,7 @@ namespace Scream
                 {
                     HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                     req.Timeout = 5000;
-                    var responsetimer = new Stopwatch();
+                    Stopwatch responsetimer = new Stopwatch();
                     responsetimer.Start();
                     HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
                     responsetimer.Stop();
@@ -134,7 +134,7 @@ namespace Scream
                     req.Timeout = 5000;
                     WebProxy proxy = new WebProxy("127.0.0.1", port);
                     req.Proxy = proxy;
-                    var responsetimer = new Stopwatch();
+                    Stopwatch responsetimer = new Stopwatch();
                     responsetimer.Start();
                     HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
                     responsetimer.Stop();
@@ -161,7 +161,7 @@ namespace Scream
         {
             try
             {
-                var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+                byte[] plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
                 return Convert.ToBase64String(Encoding.UTF8.GetBytes(plainText));
             }
             catch
@@ -258,7 +258,7 @@ namespace Scream
         /// <param name="jsonObject"></param>
         public static void ChangePropertiesToLowerCase(JObject jsonObject)
         {
-            foreach (var property in jsonObject.Properties().ToList())
+            foreach (JProperty property in jsonObject.Properties().ToList())
             {
                 if (property.Value.Type == JTokenType.Object)// replace property names in child object
                     ChangePropertiesToLowerCase((JObject)property.Value);

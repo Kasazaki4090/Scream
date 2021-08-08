@@ -46,7 +46,7 @@ namespace Scream
             }
             else if (mainWindow.useMultipleServer)
             {
-                foreach (var tg in mainWindow.profiles)
+                foreach (Dictionary<string, object> tg in mainWindow.profiles)
                 {
                     tag.Add(tg["tag"].ToString());
                 }

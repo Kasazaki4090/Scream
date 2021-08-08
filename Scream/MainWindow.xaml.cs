@@ -296,7 +296,7 @@ namespace Scream
             bool findMissingFile = false;
             string coreDirectory = AppDomain.CurrentDomain.BaseDirectory + @"v2ray-core\";
             string coreDirectoryX = AppDomain.CurrentDomain.BaseDirectory + @"xray-core\";
-            foreach (var file in Utilities.necessaryFiles.Zip(Utilities.necessaryFilesX, Tuple.Create))
+            foreach (Tuple<string, string> file in Utilities.necessaryFiles.Zip(Utilities.necessaryFilesX, Tuple.Create))
             {
                 if (!File.Exists(coreDirectory + file.Item1) && !File.Exists(coreDirectoryX + file.Item2))
                 {
@@ -310,7 +310,7 @@ namespace Scream
             }
             if (findMissingFile)
             {
-                var result = AdonisUI.Controls.MessageBox.Show(Strings.messagenocore, Strings.messagenocoretitle, AdonisUI.Controls.MessageBoxButton.OKCancel);
+                AdonisUI.Controls.MessageBoxResult result = AdonisUI.Controls.MessageBox.Show(Strings.messagenocore, Strings.messagenocoretitle, AdonisUI.Controls.MessageBoxButton.OKCancel);
                 switch (result)
                 {
                     case AdonisUI.Controls.MessageBoxResult.OK:
@@ -343,8 +343,8 @@ namespace Scream
         #region read/write settings
         private void WriteSettings()
         {
-            var settingPath = AppDomain.CurrentDomain.BaseDirectory + "settings.json";
-            var settings = new Dictionary<string, object>
+            string settingPath = AppDomain.CurrentDomain.BaseDirectory + "settings.json";
+            Dictionary<string, object> settings = new Dictionary<string, object>
             {
                 {
                     "appStatus",
@@ -393,7 +393,7 @@ namespace Scream
 
         private void ReadSettings()
         {
-            var settingPath = AppDomain.CurrentDomain.BaseDirectory + "settings.json";
+            string settingPath = AppDomain.CurrentDomain.BaseDirectory + "settings.json";
             if (!File.Exists(settingPath))
             {
                 WriteSettings();
@@ -401,7 +401,7 @@ namespace Scream
             else
             {
                 JavaScriptSerializer javaScriptSerializer = new JavaScriptSerializer();
-                var settingString = File.ReadAllText(settingPath);
+                string settingString = File.ReadAllText(settingPath);
 
                 dynamic settings = javaScriptSerializer.Deserialize<dynamic>(settingString);
                 try
@@ -609,13 +609,13 @@ namespace Scream
 
         private void UpdatePacMenuList()
         {
-            var pacMenuList = mainMenu.Items[pacListMenuItemIndex] as MenuItem;
+            MenuItem pacMenuList = mainMenu.Items[pacListMenuItemIndex] as MenuItem;
             pacMenuList.Items.Clear();
-            var pacDir = AppDomain.CurrentDomain.BaseDirectory + @"pac\";
+            string pacDir = AppDomain.CurrentDomain.BaseDirectory + @"pac\";
             DirectoryInfo pacDirInfo = new DirectoryInfo(pacDir);
-            var pacFiles = pacDirInfo.GetFiles("*.js", SearchOption.TopDirectoryOnly);
+            FileInfo[] pacFiles = pacDirInfo.GetFiles("*.js", SearchOption.TopDirectoryOnly);
             int i = 0;
-            foreach (var pacFile in pacFiles)
+            foreach (FileInfo pacFile in pacFiles)
             {
                 MenuItem menuItem = new MenuItem
                 {
@@ -670,8 +670,8 @@ namespace Scream
                     Process v2rayProcess = new Process();
                     v2rayProcess.StartInfo.FileName = Utilities.corePath;
                     DirectoryInfo confdirDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\confdir\");
-                    var Configs = confdirDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
-                    foreach (var conf in Configs)
+                    FileInfo[] Configs = confdirDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
+                    foreach (FileInfo conf in Configs)
                     {
                         Debug.WriteLine(v2rayProcess.StartInfo.FileName);
                         v2rayProcess.StartInfo.Arguments = "-test -config " + "\"" + conf.FullName + "\"";
@@ -710,9 +710,9 @@ namespace Scream
                     v2rayProcess.StartInfo.FileName = Utilities.corePath;
 
                     DirectoryInfo configDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\");
-                    var cusConfigs = configDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
+                    FileInfo[] cusConfigs = configDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
                     cusProfiles.Clear();
-                    foreach (var cusConfig in cusConfigs)
+                    foreach (FileInfo cusConfig in cusConfigs)
                     {
                         Debug.WriteLine(v2rayProcess.StartInfo.FileName);
                         v2rayProcess.StartInfo.Arguments = "-test -config " + "\"" + cusConfig.FullName + "\"";
@@ -751,9 +751,9 @@ namespace Scream
             v2rayProcess.StartInfo.FileName = Utilities.corePath;
 
             DirectoryInfo configDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\");
-            var cusConfigs = configDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
+            FileInfo[] cusConfigs = configDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
             cusProfiles.Clear();
-            foreach (var cusConfig in cusConfigs)
+            foreach (FileInfo cusConfig in cusConfigs)
             {
                 Debug.WriteLine(v2rayProcess.StartInfo.FileName);
                 v2rayProcess.StartInfo.Arguments = "-test -config " + "\"" + cusConfig.FullName + "\"";
@@ -774,8 +774,8 @@ namespace Scream
                 catch { };
             }
             DirectoryInfo confdirDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\confdir\");
-            var Configs = confdirDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
-            foreach (var conf in Configs)
+            FileInfo[] Configs = confdirDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
+            foreach (FileInfo conf in Configs)
             {
                 Debug.WriteLine(v2rayProcess.StartInfo.FileName);
                 v2rayProcess.StartInfo.Arguments = "-test -config " + "\"" + conf.FullName + "\"";
@@ -797,7 +797,7 @@ namespace Scream
 
         private void UpdateServerMenuList(Dictionary<string, string> responseTime)
         {
-            var serverMenuList = mainMenu.Items[serverMenuListIndex] as MenuItem;
+            MenuItem serverMenuList = mainMenu.Items[serverMenuListIndex] as MenuItem;
             serverMenuList.Items.Clear();
             if (profiles.Count == 0 && cusProfiles.Count == 0 && subsOutbounds.Count == 0)
             {
@@ -807,9 +807,9 @@ namespace Scream
             int tagIndex = 0;
             foreach (Dictionary<string, object> outbound in this.profiles)
             {
-                var tagadd = responseTime.ContainsKey(outbound["tag"].ToString()) ? "[" + responseTime[outbound["tag"].ToString()] + "]" : null;
+                string tagadd = responseTime.ContainsKey(outbound["tag"].ToString()) ? "[" + responseTime[outbound["tag"].ToString()] + "]" : null;
                 bool selectedOutboundIndex = usePartServer ? selectedPartServerIndex.Exists(x => (int)x == tagIndex) : selectedServerIndex == tagIndex;
-                var newOutboundItem = new MenuItem
+                MenuItem newOutboundItem = new MenuItem
                 {
                     Header = (outbound["tag"] as string).Replace("_", "__") + tagadd,
                     Tag = tagIndex,
@@ -821,9 +821,9 @@ namespace Scream
             }
             foreach (Dictionary<string, object> outbound in this.subsOutbounds)
             {
-                var tagadd = responseTime.ContainsKey(outbound["tag"].ToString()) ? "[" + responseTime[outbound[@"tag"].ToString()] + "]" : null;
+                string tagadd = responseTime.ContainsKey(outbound["tag"].ToString()) ? "[" + responseTime[outbound[@"tag"].ToString()] + "]" : null;
                 bool selectedOutboundIndex = usePartServer ? selectedPartServerIndex.Exists(x => (int)x == tagIndex) : selectedServerIndex == tagIndex;
-                var newOutboundItem = new MenuItem
+                MenuItem newOutboundItem = new MenuItem
                 {
                     Header = (outbound["tag"] as string).Replace("_", "__") + tagadd,
                     Tag = tagIndex,
@@ -836,7 +836,7 @@ namespace Scream
             if (profiles.Count + subsOutbounds.Count > 0)
             {
                 serverMenuList.Items.Add(new Separator());
-                var newItem = new MenuItem
+                MenuItem newItem = new MenuItem
                 {
                     Header = Strings.useall,
                     Tag = useAllServerTag,
@@ -847,7 +847,7 @@ namespace Scream
             }
             if (profiles.Count + subsOutbounds.Count > 0)
             {
-                var newItem = new MenuItem
+                MenuItem newItem = new MenuItem
                 {
                     Header = Strings.usepart,
                     IsChecked = !useCusProfile && usePartServer,
@@ -859,7 +859,7 @@ namespace Scream
             if (profiles.Count + subsOutbounds.Count > 0)
             {
                 serverMenuList.Items.Add(new Separator());
-                var newItem = new MenuItem
+                MenuItem newItem = new MenuItem
                 {
                     Header = Strings.speedtest,
                     IsEnabled = speedtestState,
@@ -874,7 +874,7 @@ namespace Scream
             }
             foreach (string cusConfigFileName in cusProfiles)
             {
-                var newOutboundItem = new MenuItem
+                MenuItem newOutboundItem = new MenuItem
                 {
                     Header = "_" + cusConfigFileName.Replace("_", "__"),
                     IsChecked = useCusProfile && cusConfigFileName == selectedCusConfig,
@@ -1096,7 +1096,7 @@ namespace Scream
             else if (proxyMode == ProxyMode.global)
             {
                 registry.SetValue("ProxyEnable", 1);
-                var proxyServer = $"http://127.0.0.1:{httpPort}";
+                string proxyServer = $"http://127.0.0.1:{httpPort}";
                 registry.SetValue("ProxyServer", proxyServer);
                 registry.SetValue("ProxyOverride", bypass);
                 registry.DeleteValue("AutoConfigURL", false);
@@ -1212,7 +1212,7 @@ namespace Scream
                 {"loglevel", logLevel }
 #endif
             };
-            var dnsList = dnsString.Split(',');
+            string[] dnsList = dnsString.Split(',');
             if (dnsList.Count() > 0)
             {
                 fullConfig["dns"] = new Dictionary<string, string[]>
@@ -1254,12 +1254,12 @@ namespace Scream
                     exceptTagOutbounds.Add(outbound[@"tag"].ToString());
                 }
             }
-            var uniqueTagsExceptDirectDecline = new List<object>(uniqueTagOutbounds.Keys);
+            List<object> uniqueTagsExceptDirectDecline = new List<object>(uniqueTagOutbounds.Keys);
             uniqueTagOutbounds["direct"] = Utilities.OUTBOUND_DIRECT;
             uniqueTagOutbounds["decline"] = Utilities.OUTBOUND_DECLINE;
 
             fullConfig["routing"] = Utilities.DeepClone(routingRuleSets[selectedRoutingSet]);
-            var currentRules = (fullConfig["routing"] as Dictionary<string, object>)["rules"] as IList<object>;
+            IList<object> currentRules = (fullConfig["routing"] as Dictionary<string, object>)["rules"] as IList<object>;
             foreach (Dictionary<string, object> aRule in currentRules)
             {
                 if (uniqueTagOutbounds.ContainsKey(aRule["outboundTag"].ToString()))

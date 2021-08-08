@@ -365,7 +365,7 @@ namespace Scream.Views
         public List<OutboundSummary> ImportURL(string importUrl)
         {
             List<OutboundSummary> TAG = new List<OutboundSummary>();
-            foreach (var link in importUrl.Split(Environment.NewLine.ToCharArray()))
+            foreach (string link in importUrl.Split(Environment.NewLine.ToCharArray()))
             {
                 if (link.StartsWith("ss"))
                 {
@@ -397,9 +397,9 @@ namespace Scream.Views
 
         public string ImportShadowsocks(string url)
         {
-            var link = url.Contains("#") ? url.Substring(5, url.IndexOf("#") - 5) : url.Substring(5);
-            var tag = url.Contains("#") ? url.Substring(url.IndexOf("#") + 1).Trim() : "shadowsocks-" + new Random(Guid.NewGuid().GetHashCode()).Next(100, 1000);
-            var linkParseArray = ExtUtils.Base64Decode(link).Split(new char[2] { ':', '@' });
+            string link = url.Contains("#") ? url.Substring(5, url.IndexOf("#") - 5) : url.Substring(5);
+            string tag = url.Contains("#") ? url.Substring(url.IndexOf("#") + 1).Trim() : "shadowsocks-" + new Random(Guid.NewGuid().GetHashCode()).Next(100, 1000);
+            string[] linkParseArray = ExtUtils.Base64Decode(link).Split(new char[2] { ':', '@' });
             Dictionary<string, object> ShadowsocksProfiles = Utilities.outboundTemplate;
             Dictionary<string, object> ShadowsocksTemplate = Utilities.ShadowsocksOutboundTemplateNew();
             ShadowsocksProfiles["protocol"] = "shadowsocks";
@@ -423,9 +423,9 @@ namespace Scream.Views
             Dictionary<string, object> settings = TrojanProfiles["settings"] as Dictionary<string, object>;
             Dictionary<string, object> servers = (settings["servers"] as IList<object>)[0] as Dictionary<string, object>;
 
-            var link = url.Contains("#") ? url.Substring(9, url.IndexOf("#") - 9) : url.Substring(9);
-            var tag = url.Contains("#") ? url.Substring(url.IndexOf("#") + 1).Trim() : "trojan-" + new Random(Guid.NewGuid().GetHashCode()).Next(100, 1000);
-            var linkParseArray = link.Split(new char[2] { ':', '@' });
+            string link = url.Contains("#") ? url.Substring(9, url.IndexOf("#") - 9) : url.Substring(9);
+            string tag = url.Contains("#") ? url.Substring(url.IndexOf("#") + 1).Trim() : "trojan-" + new Random(Guid.NewGuid().GetHashCode()).Next(100, 1000);
+            string[] linkParseArray = link.Split(new char[2] { ':', '@' });
 
             TrojanProfiles["protocol"] = "trojan";
             TrojanProfiles["tag"] = HttpUtility.UrlDecode(tag);

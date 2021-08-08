@@ -17,9 +17,9 @@ namespace Scream
 
         public static T DeepClone<T>(T obj)
         {
-            using (var ms = new MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
-                var formatter = new BinaryFormatter();
+                BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(ms, obj);
                 ms.Position = 0;
 
@@ -40,8 +40,8 @@ namespace Scream
                 int size = templateQueue.Count;
                 for (int i = 0; i < size; i += 1)
                 {
-                    var templateNode = templateQueue.Dequeue();
-                    var outboundNode = outboundQueue.Dequeue();
+                    Dictionary<string, object> templateNode = templateQueue.Dequeue();
+                    Dictionary<string, object> outboundNode = outboundQueue.Dequeue();
                     foreach (KeyValuePair<string, object> entry in templateNode)
                     {
                         if (!outboundNode.ContainsKey(entry.Key))
@@ -59,7 +59,7 @@ namespace Scream
                             else if (entry.Value.GetType().Equals(typeof(object[])) && (entry.Value as object[])[0].GetType().Equals(typeof(Dictionary<string, object>)))
                             {
                                 //Debug.WriteLine($"find array at key {entry.Key}, call self recursively");
-                                var subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
+                                Dictionary<string, object> subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
                                 foreach (Dictionary<string, object> subnode in outboundNode[entry.Key] as object[])
                                 {
                                     AddMissingKeysForVmess(subnode, subtemplate);
@@ -74,7 +74,7 @@ namespace Scream
 
         public static void AddMissingKeysForVmess(Dictionary<string, object> outbound)
         {
-            var template = Utilities.VmessOutboundTemplate();
+            Dictionary<string, object> template = Utilities.VmessOutboundTemplate();
             AddMissingKeysForVmess(outbound, template);
         }
 
@@ -90,8 +90,8 @@ namespace Scream
                 int size = templateQueue.Count;
                 for (int i = 0; i < size; i += 1)
                 {
-                    var templateNode = templateQueue.Dequeue();
-                    var outboundNode = outboundQueue.Dequeue();
+                    Dictionary<string, object> templateNode = templateQueue.Dequeue();
+                    Dictionary<string, object> outboundNode = outboundQueue.Dequeue();
                     foreach (KeyValuePair<string, object> entry in templateNode)
                     {
                         if (!outboundNode.ContainsKey(entry.Key))
@@ -109,7 +109,7 @@ namespace Scream
                             else if (entry.Value.GetType().Equals(typeof(object[])) && (entry.Value as object[])[0].GetType().Equals(typeof(Dictionary<string, object>)))
                             {
                                 //Debug.WriteLine($"find array at key {entry.Key}, call self recursively");
-                                var subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
+                                Dictionary<string, object> subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
                                 foreach (Dictionary<string, object> subnode in outboundNode[entry.Key] as object[])
                                 {
                                     AddMissingKeysForVless(subnode, subtemplate);
@@ -124,7 +124,7 @@ namespace Scream
 
         public static void AddMissingKeysForVless(Dictionary<string, object> outbound)
         {
-            var template = Utilities.VlessOutboundJson();
+            Dictionary<string, object> template = Utilities.VlessOutboundJson();
             AddMissingKeysForVless(outbound, template);
         }
 
@@ -140,8 +140,8 @@ namespace Scream
                 int size = templateQueue.Count;
                 for (int i = 0; i < size; i += 1)
                 {
-                    var templateNode = templateQueue.Dequeue();
-                    var outboundNode = outboundQueue.Dequeue();
+                    Dictionary<string, object> templateNode = templateQueue.Dequeue();
+                    Dictionary<string, object> outboundNode = outboundQueue.Dequeue();
                     foreach (KeyValuePair<string, object> entry in templateNode)
                     {
                         if (!outboundNode.ContainsKey(entry.Key))
@@ -159,7 +159,7 @@ namespace Scream
                             else if (entry.Value.GetType().Equals(typeof(object[])) && (entry.Value as object[])[0].GetType().Equals(typeof(Dictionary<string, object>)))
                             {
                                 //Debug.WriteLine($"find array at key {entry.Key}, call self recursively");
-                                var subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
+                                Dictionary<string, object> subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
                                 foreach (Dictionary<string, object> subnode in outboundNode[entry.Key] as object[])
                                 {
                                     AddMissingKeysForTrojan(subnode, subtemplate);
@@ -174,7 +174,7 @@ namespace Scream
 
         public static void AddMissingKeysForTrojan(Dictionary<string, object> outbound)
         {
-            var template = Utilities.TrojanOutboundJson();
+            Dictionary<string, object> template = Utilities.TrojanOutboundJson();
             AddMissingKeysForTrojan(outbound, template);
         }
 
@@ -190,8 +190,8 @@ namespace Scream
                 int size = templateQueue.Count;
                 for (int i = 0; i < size; i += 1)
                 {
-                    var templateNode = templateQueue.Dequeue();
-                    var outboundNode = outboundQueue.Dequeue();
+                    Dictionary<string, object> templateNode = templateQueue.Dequeue();
+                    Dictionary<string, object> outboundNode = outboundQueue.Dequeue();
                     foreach (KeyValuePair<string, object> entry in templateNode)
                     {
                         if (!outboundNode.ContainsKey(entry.Key))
@@ -209,7 +209,7 @@ namespace Scream
                             else if (entry.Value.GetType().Equals(typeof(object[])) && (entry.Value as object[])[0].GetType().Equals(typeof(Dictionary<string, object>)))
                             {
                                 //Debug.WriteLine($"find array at key {entry.Key}, call self recursively");
-                                var subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
+                                Dictionary<string, object> subtemplate = (entry.Value as object[])[0] as Dictionary<string, object>;
                                 foreach (Dictionary<string, object> subnode in outboundNode[entry.Key] as object[])
                                 {
                                     AddMissingKeysForShadowsocks(subnode, subtemplate);
@@ -224,13 +224,13 @@ namespace Scream
 
         public static void AddMissingKeysForShadowsocks(Dictionary<string, object> outbound)
         {
-            var template = Utilities.ShadowsocksOutboundJson();
+            Dictionary<string, object> template = Utilities.ShadowsocksOutboundJson();
             AddMissingKeysForShadowsocks(outbound, template);
         }
 
         public static bool IsWindows10()
         {
-            var reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+            RegistryKey reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
 
             string productName = (string)reg.GetValue("ProductName");
 
