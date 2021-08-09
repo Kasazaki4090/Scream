@@ -22,7 +22,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" x:Name="stackpanel_serverlist">
-                    <ListBox Name="ListBoxOutbounds" Width="212" Height="{Binding ElementName=stackpanel_serverlist,Path=ActualHeight}" SelectionMode="Extended">
+                    <ListBox Name="ListBoxOutbounds" Width="212" Height="{Binding ElementName=stackpanel_serverlist,Path=ActualHeight}" SelectionMode="Extended" VirtualizingStackPanel.VirtualizationMode="Recycling">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="0,10,0,10">

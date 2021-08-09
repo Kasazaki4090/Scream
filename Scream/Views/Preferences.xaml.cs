@@ -55,7 +55,7 @@ namespace Scream
             {
                 tag.Add(mainWindow.profiles[mainWindow.selectedServerIndex]["tag"].ToString());
             }
-            TextBlockOutBounds.Text = String.Join(",", tag);
+            TextBlockOutBounds.Text = string.Join(",", tag);
         }
 
         private void Button_Click(object sender, System.Windows.RoutedEventArgs e)

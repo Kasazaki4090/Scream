@@ -9,7 +9,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Web;
 using System.Windows.Controls;
 
@@ -114,9 +113,10 @@ namespace Scream.Views
                         return;
                     }
                 }
-                catch
-                {};
-                
+                catch{};
+                v2rayProcess.Dispose();
+                GC.SuppressFinalize(this);
+                mainWindow.v2rayJsonConfigTest = null;
                 mainWindow.profiles[ListBoxOutbounds.SelectedIndex] = outbound;
                 OutboundsList[ListBoxOutbounds.SelectedIndex] = new OutboundSummary { Protocol = mainWindow.profiles[ListBoxOutbounds.SelectedIndex]["protocol"].ToString(), Tag = mainWindow.profiles[ListBoxOutbounds.SelectedIndex]["tag"].ToString() };
             }

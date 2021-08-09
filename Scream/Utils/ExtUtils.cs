@@ -267,5 +267,13 @@ namespace Scream
             }
         }
 
+        /// <summary>
+        /// gc collect
+        /// </summary>
+        public static void FlushMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
     }
 }

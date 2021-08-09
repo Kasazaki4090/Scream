@@ -67,6 +67,7 @@ namespace Scream
         private FileSystemWatcher pacFileWatcher;
         private FileSystemWatcher cusFileWatcher;
         private FileSystemWatcher confdirFileWatcher;
+
         public MainWindow()
         {
             SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
@@ -138,21 +139,7 @@ namespace Scream
                     Dispatcher.Invoke(() => { ConfdirFileWatcher_Changed(sender, e); });
                 }
             };
-            confdirFileWatcher.EnableRaisingEvents = true;
-            //OverallChanged(this, null);
-
-            Outbounds outbounds = new Outbounds { mainWindow = this };
-            outbounds.InitializeData();
-            PageFrame.Content = outbounds;
-            Major.SelectionChanged += NavigateMajor_SelectionChanged;
-            Major.SelectedIndex = 0;
-
-            Toggle.DataContext = toggle;
-            toggle.ColorScheme = colorscheme;
-            toggle.AutoStart = ExtUtils.AutoStartCheck();
-            toggle.UDPSupport = udpSupport;
-            toggle.ShareOverLan = shareOverLan;
-            ResourceLocator.SetColorScheme(Application.Current.Resources, !toggle.ColorScheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+            confdirFileWatcher.EnableRaisingEvents = true;            
             OverallChanged(this, null);
         }
 
@@ -489,7 +476,7 @@ namespace Scream
             }
         }
 
-        void ModeChanged(object sender, RoutedEventArgs e)
+        private void ModeChanged(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine($"mode changed by {sender} {e}");
             MenuItem senderItem = sender as MenuItem;
@@ -663,8 +650,7 @@ namespace Scream
             if (confdirFileWatcher != null)
             {
                 confdirFileWatcher.EnableRaisingEvents = false;
-                Thread th = new Thread(new ThreadStart(
-                delegate ()
+                Thread th = new Thread(new ThreadStart(() =>
                 {
                     Thread.Sleep(3000);
                     Process v2rayProcess = new Process();
@@ -691,6 +677,8 @@ namespace Scream
                     }
                     Dispatcher.Invoke(() => { CoreConfigChanged(this); });
                     confdirFileWatcher.EnableRaisingEvents = true;
+                    v2rayProcess.Dispose();
+                    GC.SuppressFinalize(this);
                 }
                 ));
                 th.Start();
@@ -701,8 +689,8 @@ namespace Scream
             if (cusFileWatcher != null)
             {
                 cusFileWatcher.EnableRaisingEvents = false;
-                Thread th = new Thread(new ThreadStart(
-                delegate ()
+                
+                Thread th = new Thread(new ThreadStart(()=>
                 {
                     Thread.Sleep(3000);
 
@@ -734,14 +722,21 @@ namespace Scream
                     }
                     Dispatcher.Invoke(() => { UpdateServerMenuList(speedTestResultDic); });
                     cusFileWatcher.EnableRaisingEvents = true;
+                    v2rayProcess.Dispose();
+                    GC.SuppressFinalize(this);
                 }
                 ));
                 th.Start();
+                
             }
         }
         private void ConfigScanner_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             Dispatcher.Invoke(() => { UpdateServerMenuList(speedTestResultDic); });
+            configScanner.DoWork -= ConfigScanner_DoWork;
+            configScanner.RunWorkerCompleted -= ConfigScanner_RunWorkerCompleted;
+            configScanner = null;
+            ExtUtils.FlushMemory();
         }
 
         private void ConfigScanner_DoWork(object sender, DoWorkEventArgs e)
@@ -793,6 +788,8 @@ namespace Scream
                 catch { };
             }
             Dispatcher.Invoke(() => { CoreConfigChanged(this); });
+            v2rayProcess.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private void UpdateServerMenuList(Dictionary<string, string> responseTime)
@@ -940,20 +937,16 @@ namespace Scream
         #endregion
 
         #region speed test
-
+        BackgroundWorker speedTestWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
         Dictionary<string, string> speedTestResultDic = new Dictionary<string, string>();
         private Semaphore speedTestSemaphore;
         private const string SpeedTestUrl = @"https://www.google.com/generate_204";
 
-        void SpeedTest(object sender, RoutedEventArgs e)
+        private void SpeedTest(object sender, RoutedEventArgs e)
         {
             speedtestState = false;
             Dispatcher.Invoke(() => { UpdateServerMenuList(speedTestResultDic); });
             speedTestResultDic.Clear();
-            BackgroundWorker speedTestWorker = new BackgroundWorker
-            {
-                WorkerSupportsCancellation = true
-            };
             speedTestWorker.DoWork += SpeedTestWorker_DoWork;
             speedTestWorker.RunWorkerCompleted += SpeedTestWorker_RunWorkerCompleted;
             if (speedTestWorker.IsBusy)
@@ -980,7 +973,7 @@ namespace Scream
 #if DEBUG
             v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 #else
-                v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 #endif
             v2rayProcessTest.Start();
 
@@ -988,19 +981,28 @@ namespace Scream
             {
                 tag++;
                 speedTestSemaphore.WaitOne();
-                tasks.Add(Task.Run(() => { speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, httpPort + tag)); }).ContinueWith(task => { speedTestSemaphore.Release(); }));
+                tasks.Add(Task.Run(() =>
+                {
+                    speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, httpPort + tag)); })
+                    .ContinueWith(task => { speedTestSemaphore.Release(); })
+                    );
                 Thread.Sleep(10);
             }
             Task.WaitAll(tasks.ToArray());
             v2rayProcessTest.Kill();
-            Debug.WriteLine("task done……");
+            v2rayProcessTest.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private void SpeedTestWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             speedtestState = true;
             Dispatcher.Invoke(() => { UpdateServerMenuList(speedTestResultDic); });
+            v2rayJsonConfigTest = null;
             Debug.WriteLine("test done ");
+            speedTestWorker.DoWork -= SpeedTestWorker_DoWork;
+            speedTestWorker.RunWorkerCompleted -= SpeedTestWorker_RunWorkerCompleted;
+            ExtUtils.FlushMemory();
         }
 
         #endregion
@@ -1055,6 +1057,7 @@ namespace Scream
                 System.IO.Stream output = response.OutputStream;
                 output.Write(respondBytes, 0, respondBytes.Length);
                 output.Close();
+                Thread.Sleep(0);
             }
         }
 
@@ -1154,6 +1157,7 @@ namespace Scream
                         notifyIcon.ShowBalloonTip("", Strings.messagecorequit, BalloonIcon.Warning);
                     });
                 }
+                Thread.Sleep(0);
             }
         }
 
@@ -1169,7 +1173,7 @@ namespace Scream
             };
         }
 
-        void ToggleCore()
+        private void ToggleCore()
         {
             this.UnloadV2ray();
             coreWorkerSemaphore.Release(1);
@@ -1180,7 +1184,7 @@ namespace Scream
         byte[] v2rayJsonConfig = new byte[0];
         public byte[] v2rayJsonConfigTest = new byte[0];
 
-        void CoreConfigChanged(object sender)
+        private void CoreConfigChanged(object sender)
         {
             Debug.WriteLine($"{sender} calls config change");
             if (proxyState == true)
@@ -1197,9 +1201,10 @@ namespace Scream
             }
             this.UpdateServerMenuList(speedTestResultDic);
             this.UpdateRuleSetMenuList();
+            ExtUtils.FlushMemory();
         }
 
-        byte[] GenerateConfigFile()
+        private byte[] GenerateConfigFile()
         {
             Dictionary<string, object> fullConfig = Utilities.configTemplate;
             fullConfig["log"] = new Dictionary<string, string>
@@ -1322,7 +1327,7 @@ namespace Scream
             return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(fullConfig, Formatting.Indented));
         }
 
-        byte[] GenerateConfigFileTest()
+        private byte[] GenerateConfigFileTest()
         {
             Dictionary<string, object> fullConfig = Utilities.configTemplate;
             List<Dictionary<string, object>> allOutbounds = new List<Dictionary<string, object>>(profiles);
@@ -1407,6 +1412,9 @@ namespace Scream
             e.Cancel = true;
             Hide();
             base.OnClosing(e);
+            PageFrame.Content = null;
+            Toggle.DataContext = null;
+            ExtUtils.FlushMemory();
         }
         private void QuitScream(object sender, RoutedEventArgs e)
         {
@@ -1434,6 +1442,19 @@ namespace Scream
 
         private void ShowWindow(object sender, RoutedEventArgs e)
         {
+            Outbounds outbounds = new Outbounds { mainWindow = this };
+            outbounds.InitializeData();
+            PageFrame.Content = outbounds;
+            Major.SelectionChanged += NavigateMajor_SelectionChanged;
+            Major.SelectedIndex = 0;
+
+            Toggle.DataContext = toggle;
+            toggle.ColorScheme = colorscheme;
+            toggle.AutoStart = ExtUtils.AutoStartCheck();
+            toggle.UDPSupport = udpSupport;
+            toggle.ShareOverLan = shareOverLan;
+            ResourceLocator.SetColorScheme(Application.Current.Resources, !toggle.ColorScheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+
             Show();
             Activate();
         }
