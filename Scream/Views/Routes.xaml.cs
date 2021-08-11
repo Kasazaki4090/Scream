@@ -34,7 +34,7 @@ namespace Scream.Views
 
         private void ListBoxRoutes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ListBoxRoutes.SelectedIndex >= 0 && ListBoxRoutes.SelectedIndex < mainWindow.profiles.Count)
+            if (ListBoxRoutes.SelectedIndex >= 0 && ListBoxRoutes.SelectedIndex < mainWindow.routingRuleSets.Count)
             {
                 Json.RuleJson = JsonConvert.SerializeObject(mainWindow.routingRuleSets[ListBoxRoutes.SelectedIndex], Formatting.Indented);
             }
