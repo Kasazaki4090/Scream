@@ -34,26 +34,33 @@ namespace Scream
             TextBlockCoreVersion.Text = Utilities.corePath;
             TextBlockMode.Text = Utilities.ProxyMode_LIST[(int)mainWindow.proxyMode];
 
-            TextBlockRoute.Text = mainWindow.routingRuleSets[mainWindow.selectedRoutingSet]["name"].ToString();
+            TextBlockRoute.Text = mainWindow.routingRuleSets.Count > 0 && mainWindow.selectedRoutingSet >= 0 ? mainWindow.routingRuleSets[mainWindow.selectedRoutingSet]["name"].ToString() : "N/A";
             TextBlockLogLevel.Text = mainWindow.logLevel;
             List<string> tag = new List<string>();
-            if (mainWindow.usePartServer)
+            if (mainWindow.profiles.Count > 0)
             {
-                foreach (int id in mainWindow.selectedPartServerIndex)
+                if (mainWindow.usePartServer)
                 {
-                    tag.Add(mainWindow.profiles[id]["tag"].ToString());
+                    foreach (int id in mainWindow.selectedPartServerIndex)
+                    {
+                        tag.Add(mainWindow.profiles[id]["tag"].ToString());
+                    }
                 }
-            }
-            else if (mainWindow.useMultipleServer)
-            {
-                foreach (Dictionary<string, object> tg in mainWindow.profiles)
+                else if (mainWindow.useMultipleServer)
                 {
-                    tag.Add(tg["tag"].ToString());
+                    foreach (Dictionary<string, object> tg in mainWindow.profiles)
+                    {
+                        tag.Add(tg["tag"].ToString());
+                    }
+                }
+                else
+                {
+                    tag.Add(mainWindow.selectedServerIndex >= 0 ? mainWindow.profiles[mainWindow.selectedServerIndex]["tag"].ToString() : "N/A");
                 }
             }
             else
             {
-                tag.Add(mainWindow.profiles[mainWindow.selectedServerIndex]["tag"].ToString());
+                tag.Add("N/A");
             }
             TextBlockOutBounds.Text = string.Join(",", tag);
         }

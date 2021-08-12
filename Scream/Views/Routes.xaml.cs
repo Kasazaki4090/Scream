@@ -4,6 +4,7 @@ using Scream.Models;
 using Scream.Resources;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Controls;
 
 namespace Scream.Views
@@ -73,8 +74,17 @@ namespace Scream.Views
             }
             if (sender == ButtonDelete)
             {
-                mainWindow.routingRuleSets.RemoveAt(ListBoxRoutes.SelectedIndex);
-                RoutesList.RemoveAt(ListBoxRoutes.SelectedIndex);
+                List<int> selectedItemIndexes = new List<int>();
+                foreach (RouteSummary id in ListBoxRoutes.SelectedItems)
+                {
+                    selectedItemIndexes.Add(RoutesList.IndexOf(id));
+                }
+                for (int r = selectedItemIndexes.Count - 1; r >= 0; r--)
+                {
+                    mainWindow.routingRuleSets.RemoveAt(selectedItemIndexes.Max());
+                    RoutesList.RemoveAt(selectedItemIndexes.Max());
+                    selectedItemIndexes.Remove(selectedItemIndexes.Max());
+                }
             }
 
         }
