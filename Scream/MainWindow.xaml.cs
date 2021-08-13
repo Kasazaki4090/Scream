@@ -60,7 +60,7 @@ namespace Scream
         public List<string> cusProfiles = new List<string>();
         public string logLevel = "none";
         public bool enableRestore = false;
-        public string subscriptionTag = "";
+        public List<string> subscriptionTag = new List<string>();
         public List<string> subscriptionUrl = new List<string>();
         public List<Dictionary<string, object>> routingRuleSets = new List<Dictionary<string, object>> { Utilities.ROUTING_GLOBAL, Utilities.ROUTING_DIRECT, Utilities.ROUTING_BYPASSCN_PRIVATE_APPLE };
 
@@ -417,10 +417,13 @@ namespace Scream
                         selectedPartServerIndex.Add((int)index);
                     }
                     bypass = settings["bypass"];
-                    subscriptionTag = settings["subscriptions"]["tag"];
-                    foreach (string subscription in settings["subscriptions"]["url"])
+                    foreach (string url in settings["subscriptions"]["url"])
                     {
-                        subscriptionUrl.Add(subscription);
+                        subscriptionUrl.Add(url);
+                    }
+                    foreach (string tag in settings["subscriptions"]["tag"])
+                    {
+                        subscriptionTag.Add(tag);
                     }
                     foreach (dynamic profile in settings["profiles"])
                     {

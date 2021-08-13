@@ -9,6 +9,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Controls;
 
@@ -196,7 +198,7 @@ namespace Scream.Views
             {
                 if (mainWindow.profiles.Count != 0)
                 {
-                    foreach (string ps in mainWindow.subscriptionTag.ToString().Split(",".ToCharArray()))
+                    foreach (string ps in mainWindow.subscriptionTag)
                     {
                         foreach (Dictionary<string, object> tag in mainWindow.profiles.ToArray())
                         {
@@ -213,7 +215,6 @@ namespace Scream.Views
                             }
                         }
                     }
-                    mainWindow.subscriptionTag = "";
                 }
                 try
                 {
@@ -344,22 +345,23 @@ namespace Scream.Views
 
         private void SubscriptionWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            mainWindow.subscriptionTag = "";
-            List<string> subscriptionTag = new List<string>();
-            List<OutboundSummary> TAG = new List<OutboundSummary>();
+            mainWindow.subscriptionTag.Clear();
+            List<Task> tasks = new List<Task>();
             foreach (string url in mainWindow.subscriptionUrl)
             {
-                TAG = ImportURL(ExtUtils.Base64Decode(ExtUtils.GetUrl(url)));
-            }
-            foreach (OutboundSummary x in TAG)
-            {
-                this.Dispatcher.Invoke(() =>
+                tasks.Add(Task.Run(() =>
                 {
-                    OutboundsList.Add(x);
-                });
-                subscriptionTag.Add(x.Tag);
+                    foreach (OutboundSummary x in ImportURL(ExtUtils.Base64Decode(ExtUtils.GetUrl(url))))
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            OutboundsList.Add(x);
+                        });
+                        mainWindow.subscriptionTag.Add(x.Tag);
+                    }
+                }));
             }
-            mainWindow.subscriptionTag = string.Join(",", subscriptionTag);
+            Task.WaitAll(tasks.ToArray());
         }
 
         public List<OutboundSummary> ImportURL(string importUrl)
