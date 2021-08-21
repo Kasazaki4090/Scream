@@ -986,7 +986,7 @@ namespace Scream
                 speedTestSemaphore.WaitOne();
                 tasks.Add(Task.Run(() =>
                 {
-                    speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, httpPort + tag)); })
+                    speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, 29527 + tag)); })
                     .ContinueWith(task => { speedTestSemaphore.Release(); })
                     );
                 Thread.Sleep(10);
@@ -1357,7 +1357,7 @@ namespace Scream
                 tag++;
                 allInbounds.Add(new Dictionary<string, object>
                 {
-                    { "port", httpPort + tag },
+                    { "port", 29527 + tag },
                     { "listen",  @"127.0.0.1" },
                     { "protocol", "http" },
                     { "tag", od["tag"] }
