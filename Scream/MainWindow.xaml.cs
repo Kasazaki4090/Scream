@@ -590,7 +590,10 @@ namespace Scream
             }
             this.UpdateStatusAndModeMenus();
             this.UpdatePacMenuList();
-            WriteSettings();
+            if (sender == ApplyConfig)
+            {
+                WriteSettings();
+            }
         }
 
         #endregion
