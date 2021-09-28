@@ -177,6 +177,7 @@ namespace Scream
         private void ApplyConfig_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             OverallChanged(this, null);
+            WriteSettings();
         }
         #endregion
 
@@ -590,10 +591,6 @@ namespace Scream
             }
             this.UpdateStatusAndModeMenus();
             this.UpdatePacMenuList();
-            if (sender == ApplyConfig)
-            {
-                WriteSettings();
-            }
         }
 
         #endregion
