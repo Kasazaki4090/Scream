@@ -70,7 +70,9 @@ namespace Scream.Views
                     return;
                 }
                 mainWindow.routingRuleSets[ListBoxRoutes.SelectedIndex] = routingobject;
+                int index = ListBoxRoutes.SelectedIndex;
                 RoutesList[ListBoxRoutes.SelectedIndex] = new RouteSummary { Name = mainWindow.routingRuleSets[ListBoxRoutes.SelectedIndex]["name"].ToString(), DomainStrategy = mainWindow.routingRuleSets[ListBoxRoutes.SelectedIndex]["domainStrategy"].ToString() };
+                ListBoxRoutes.SelectedIndex = index;
             }
             if (sender == ButtonDelete)
             {

@@ -120,7 +120,9 @@ namespace Scream.Views
                 GC.SuppressFinalize(this);
                 mainWindow.v2rayJsonConfigTest = null;
                 mainWindow.profiles[ListBoxOutbounds.SelectedIndex] = outbound;
+                int index = ListBoxOutbounds.SelectedIndex;
                 OutboundsList[ListBoxOutbounds.SelectedIndex] = new OutboundSummary { Protocol = mainWindow.profiles[ListBoxOutbounds.SelectedIndex]["protocol"].ToString(), Tag = mainWindow.profiles[ListBoxOutbounds.SelectedIndex]["tag"].ToString() };
+                ListBoxOutbounds.SelectedIndex = index;
             }
             if (sender == ButtonDelete)
             {
