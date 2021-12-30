@@ -139,7 +139,7 @@ namespace Scream
                     Dispatcher.Invoke(() => { ConfdirFileWatcher_Changed(sender, e); });
                 }
             };
-            confdirFileWatcher.EnableRaisingEvents = true;            
+            confdirFileWatcher.EnableRaisingEvents = true;
             OverallChanged(this, null);
         }
 
@@ -692,8 +692,8 @@ namespace Scream
             if (cusFileWatcher != null)
             {
                 cusFileWatcher.EnableRaisingEvents = false;
-                
-                Thread th = new Thread(new ThreadStart(()=>
+
+                Thread th = new Thread(new ThreadStart(() =>
                 {
                     Thread.Sleep(3000);
 
@@ -730,7 +730,7 @@ namespace Scream
                 }
                 ));
                 th.Start();
-                
+
             }
         }
         private void ConfigScanner_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -970,31 +970,40 @@ namespace Scream
             speedTestSemaphore = new Semaphore(10, 10);
             int tag = 0;
 
-            Process v2rayProcessTest = new Process();
-            v2rayProcessTest.StartInfo.FileName = Utilities.corePath;
-            v2rayProcessTest.StartInfo.Arguments = @" -config http://127.0.0.1:18000/test/config.json";
-#if DEBUG
-            v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-#else
-            v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-#endif
-            v2rayProcessTest.Start();
-
-            foreach (Dictionary<string, object> outbound in allOutbounds)
+            using (Process v2rayProcessTest = new Process())
             {
-                tag++;
-                speedTestSemaphore.WaitOne();
-                tasks.Add(Task.Run(() =>
+                v2rayProcessTest.StartInfo.FileName = Utilities.corePath;
+                v2rayProcessTest.StartInfo.Arguments = @" -config http://127.0.0.1:18000/test/config.json";
+#if DEBUG
+                v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+#else
+                v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+#endif
+                try
                 {
-                    speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, 29527 + tag)); })
-                    .ContinueWith(task => { speedTestSemaphore.Release(); })
-                    );
-                Thread.Sleep(10);
+                    v2rayProcessTest.Start();
+
+                    foreach (Dictionary<string, object> outbound in allOutbounds)
+                    {
+                        tag++;
+                        speedTestSemaphore.WaitOne();
+                        tasks.Add(Task.Run(() =>
+                        {
+                            speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, 29527 + tag));
+                        })
+                            .ContinueWith(task => { speedTestSemaphore.Release(); })
+                            );
+                        Thread.Sleep(10);
+                    }
+                    Task.WaitAll(tasks.ToArray());
+                    v2rayProcessTest.Close();
+                }
+                finally
+                {
+                    v2rayProcessTest.Dispose();
+                    GC.SuppressFinalize(this);
+                }
             }
-            Task.WaitAll(tasks.ToArray());
-            v2rayProcessTest.Kill();
-            v2rayProcessTest.Dispose();
-            GC.SuppressFinalize(this);
         }
 
         private void SpeedTestWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -1288,7 +1297,7 @@ namespace Scream
                     }
                 }
             }
-            
+
             bool useBalance = false;
             foreach (Dictionary<string, object> aRule in currentRules)
             {
@@ -1436,6 +1445,8 @@ namespace Scream
             }
             this.WriteSettings();
             pacFileWatcher.EnableRaisingEvents = false;
+            cusFileWatcher.EnableRaisingEvents = false;
+            confdirFileWatcher.EnableRaisingEvents = false;
             Application.Current.Shutdown();
         }
         private void ShowHelp(object sender, RoutedEventArgs e)

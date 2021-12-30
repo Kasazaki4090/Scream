@@ -101,23 +101,27 @@ namespace Scream.Views
                     }
                 };
                 mainWindow.v2rayJsonConfigTest = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outbounds, Formatting.Indented));
-                Process v2rayProcess = new Process();
-                v2rayProcess.StartInfo.FileName = Utilities.corePath;
-                v2rayProcess.StartInfo.Arguments = "-test -config http://127.0.0.1:18000/test/config.json";
-                v2rayProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                try
+                using (Process v2rayProcess = new Process())
                 {
-                    v2rayProcess.Start();
-                    v2rayProcess.WaitForExit();
-                    if (v2rayProcess.ExitCode != 0)
+                    v2rayProcess.StartInfo.FileName = Utilities.corePath;
+                    v2rayProcess.StartInfo.Arguments = "-test -config http://127.0.0.1:18000/test/config.json";
+                    v2rayProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    try
                     {
-                        mainWindow.notifyIcon.ShowBalloonTip("", Strings.messagenotvalidoutbound, BalloonIcon.None);
-                        return;
+                        v2rayProcess.Start();
+                        v2rayProcess.WaitForExit();
+                        if (v2rayProcess.ExitCode != 0)
+                        {
+                            mainWindow.notifyIcon.ShowBalloonTip("", Strings.messagenotvalidoutbound, BalloonIcon.None);
+                            return;
+                        }
+                        v2rayProcess.Close();
                     }
+                    finally {
+                        v2rayProcess.Dispose();
+                        GC.SuppressFinalize(this);
+                    };
                 }
-                catch{};
-                v2rayProcess.Dispose();
-                GC.SuppressFinalize(this);
                 mainWindow.v2rayJsonConfigTest = null;
                 mainWindow.profiles[ListBoxOutbounds.SelectedIndex] = outbound;
                 int index = ListBoxOutbounds.SelectedIndex;
