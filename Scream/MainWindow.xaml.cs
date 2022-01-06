@@ -84,6 +84,11 @@ namespace Scream
                 Application.Current.Shutdown();
                 return;
             }
+
+            configScanner.DoWork += ConfigScanner_DoWork;
+            configScanner.RunWorkerCompleted += ConfigScanner_RunWorkerCompleted;
+            configScanner.RunWorkerAsync();
+
             // read config
             ReadSettings();
             this.InitializeHttpServer();
@@ -102,9 +107,6 @@ namespace Scream
                 }
             };
             pacFileWatcher.EnableRaisingEvents = true;
-            configScanner.DoWork += ConfigScanner_DoWork;
-            configScanner.RunWorkerCompleted += ConfigScanner_RunWorkerCompleted;
-            configScanner.RunWorkerAsync();
             cusFileWatcher = new FileSystemWatcher(AppDomain.CurrentDomain.BaseDirectory + @"config\", "*.json");
             cusFileWatcher.Deleted += (object source, FileSystemEventArgs e) =>
             {
@@ -692,8 +694,8 @@ namespace Scream
             if (cusFileWatcher != null)
             {
                 cusFileWatcher.EnableRaisingEvents = false;
-
-                Thread th = new Thread(new ThreadStart(() =>
+                
+                Thread th = new Thread(new ThreadStart(()=>
                 {
                     Thread.Sleep(3000);
 
@@ -720,6 +722,9 @@ namespace Scream
                                     cusProfiles.Add(cusConfig.Name);
                                 });
                             }
+                            else {
+                                File.Move(cusConfig.FullName, string.Format(@"{0}.error", cusConfig.FullName));
+                            }
                         }
                         catch { };
                     }
@@ -730,7 +735,7 @@ namespace Scream
                 }
                 ));
                 th.Start();
-
+                
             }
         }
         private void ConfigScanner_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -747,7 +752,7 @@ namespace Scream
             Debug.WriteLine("will scan configs");
             Process v2rayProcess = new Process();
             v2rayProcess.StartInfo.FileName = Utilities.corePath;
-
+            
             DirectoryInfo configDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\");
             FileInfo[] cusConfigs = configDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
             cusProfiles.Clear();
@@ -768,9 +773,14 @@ namespace Scream
                             cusProfiles.Add(cusConfig.Name);
                         });
                     }
+                    else
+                    {
+                        File.Move(cusConfig.FullName, string.Format(@"{0}.error", cusConfig.FullName));
+                    }
                 }
                 catch { };
             }
+
             DirectoryInfo confdirDirectoryInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + @"config\confdir\");
             FileInfo[] Configs = confdirDirectoryInfo.GetFiles("*.json", SearchOption.TopDirectoryOnly);
             foreach (FileInfo conf in Configs)
@@ -790,7 +800,6 @@ namespace Scream
                 }
                 catch { };
             }
-            Dispatcher.Invoke(() => { CoreConfigChanged(this); });
             v2rayProcess.Dispose();
             GC.SuppressFinalize(this);
         }
@@ -970,40 +979,31 @@ namespace Scream
             speedTestSemaphore = new Semaphore(10, 10);
             int tag = 0;
 
-            using (Process v2rayProcessTest = new Process())
-            {
-                v2rayProcessTest.StartInfo.FileName = Utilities.corePath;
-                v2rayProcessTest.StartInfo.Arguments = @" -config http://127.0.0.1:18000/test/config.json";
+            Process v2rayProcessTest = new Process();
+            v2rayProcessTest.StartInfo.FileName = Utilities.corePath;
+            v2rayProcessTest.StartInfo.Arguments = @" -config http://127.0.0.1:18000/test/config.json";
 #if DEBUG
-                v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+            v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 #else
-                v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            v2rayProcessTest.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 #endif
-                try
-                {
-                    v2rayProcessTest.Start();
+            v2rayProcessTest.Start();
 
-                    foreach (Dictionary<string, object> outbound in allOutbounds)
-                    {
-                        tag++;
-                        speedTestSemaphore.WaitOne();
-                        tasks.Add(Task.Run(() =>
-                        {
-                            speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, 29527 + tag));
-                        })
-                            .ContinueWith(task => { speedTestSemaphore.Release(); })
-                            );
-                        Thread.Sleep(10);
-                    }
-                    Task.WaitAll(tasks.ToArray());
-                    v2rayProcessTest.Close();
-                }
-                finally
+            foreach (Dictionary<string, object> outbound in allOutbounds)
+            {
+                tag++;
+                speedTestSemaphore.WaitOne();
+                tasks.Add(Task.Run(() =>
                 {
-                    v2rayProcessTest.Dispose();
-                    GC.SuppressFinalize(this);
-                }
+                    speedTestResultDic.Add(outbound["tag"].ToString(), ExtUtils.GetHttpStatusTime(SpeedTestUrl, 29527 + tag)); })
+                    .ContinueWith(task => { speedTestSemaphore.Release(); })
+                    );
+                Thread.Sleep(10);
             }
+            Task.WaitAll(tasks.ToArray());
+            v2rayProcessTest.Kill();
+            v2rayProcessTest.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private void SpeedTestWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -1297,7 +1297,7 @@ namespace Scream
                     }
                 }
             }
-
+            
             bool useBalance = false;
             foreach (Dictionary<string, object> aRule in currentRules)
             {
