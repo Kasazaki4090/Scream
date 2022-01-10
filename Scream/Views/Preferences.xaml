@@ -1,17 +1,14 @@
-﻿<Page x:Class="Scream.Preferences" xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+﻿<Page x:Class="Scream.Preferences"
       xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:Scream"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:res="clr-namespace:Scream.Resources"
       xmlns:con="clr-namespace:Scream.Converters"
-      mc:Ignorable="d" 
-      d:DesignHeight="500" d:DesignWidth="600"
-      Title="{x:Static res:Strings.Preferences}">
+      mc:Ignorable="d" d:DesignHeight="500" d:DesignWidth="600" Title="{x:Static res:Strings.Preferences}">
     <Page.Resources>
-        <con:IntString x:Key="cvtintstring" />
+        <con:IntString x:Key="ToStringConverter" />
     </Page.Resources>
     <ScrollViewer>
         <Grid Margin="0" x:Name="Grid">
@@ -25,111 +22,87 @@
             <WrapPanel HorizontalAlignment="Right">
                 <Button x:Name="ButtonSave" Content="{x:Static res:Strings.Save}" Margin="{adonisUi:Space 0}" Click="Button_Click" />
             </WrapPanel>
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="2" x:Name="gd">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="{adonisUi:Space 1}" />
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{adonisUi:Space 1}" />
+                    <ColumnDefinition Width="1.5*" />
                 </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="{adonisUi:Space 1}" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="{adonisUi:Space 2}" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="{adonisUi:Space 2}" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="{adonisUi:Space 2}" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Content="{x:Static res:Strings.Settings}" />
+                <StackPanel Grid.Row="2" Grid.Column="0">
+                    <Label Content="{x:Static res:Strings.LocalHTTPPort}" FontWeight="Normal" />
+                    <TextBox MinWidth="140" Text="{Binding HTTP,Converter={StaticResource ToStringConverter}}" ToolTip="{x:Static res:Strings.PACInstruction}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="1">
+                    <Label Content="{x:Static res:Strings.LocalSocks5Port}" FontWeight="Normal" />
+                    <TextBox MinWidth="140"  Text="{Binding SOCKS5,Converter={StaticResource ToStringConverter}}" ToolTip="{x:Static res:Strings.PACInstruction}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="2">
+                    <Label Content="{x:Static res:Strings.loglevel}" FontWeight="Normal" />
+                    <ComboBox x:Name="ComboBoxLogLevel"  SelectedIndex="{Binding LogLevelIndex}" />
+                </StackPanel>
+                <Grid Grid.Row="4" Grid.ColumnSpan="3">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="{adonisUi:Space 2}" />
+                        <RowDefinition Height="{adonisUi:Space 1}" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="{adonisUi:Space 2}" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Content="DNS"/>
+                    <TextBox Grid.Row="2"  Height="24" AcceptsReturn="True" Text="{Binding DNS}" ToolTip="{x:Static res:Strings.ListInstruction}" />
+                </Grid>
+                <Grid Grid.Row="6" Grid.ColumnSpan="3">
+                    <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="{adonisUi:Space 2}" />
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="{adonisUi:Space 1}" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="{adonisUi:Space 1}" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Label Content="{x:Static res:Strings.Settings}" />
-                        <Grid Grid.Row="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="{adonisUi:Space 1}" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="{adonisUi:Space 1}" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <Label Content="{x:Static res:Strings.LocalHTTPPort}" FontWeight="Normal" />
-                                <TextBox Width="140" Text="{Binding HTTP,Converter={StaticResource cvtintstring}}" ToolTip="{x:Static res:Strings.PACInstruction}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <Label Content="{x:Static res:Strings.LocalSocks5Port}" FontWeight="Normal" />
-                                <TextBox Width="140"  Text="{Binding SOCKS5,Converter={StaticResource cvtintstring}}" ToolTip="{x:Static res:Strings.PACInstruction}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="4">
-                                <Label Content="{x:Static res:Strings.loglevel}" FontWeight="Normal" />
-                                <ComboBox x:Name="ComboBoxLogLevel"  SelectedIndex="{Binding LogLevelIndex}" Width="103" />
-                            </StackPanel>
-                        </Grid>
-                    </Grid>
-                    <Grid Grid.Row="2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="{adonisUi:Space 1}" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Label Content="DNS"/>
-                        <WrapPanel Grid.Row="2" Orientation="Horizontal">
-                            <TextBox Width="400" Height="24" AcceptsReturn="True" Text="{Binding DNS}" ToolTip="{x:Static res:Strings.ListInstruction}" />
-                        </WrapPanel>
-                    </Grid>
-                    <Grid Grid.Row="4">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="{adonisUi:Space 1}" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Label Content="{x:Static res:Strings.Bypass}"/>
-                        <WrapPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBox Width="400" Height="90" AcceptsReturn="True" Text="{Binding Bypass}" TextWrapping="Wrap" ToolTip="{x:Static res:Strings.BypassInstruction}" />
-                        </WrapPanel>
-                    </Grid>
-                    <Grid Grid.Row="6">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="{adonisUi:Space 1}" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Label Content="{x:Static res:Strings.Subscription}" />
-                        <WrapPanel Grid.Row="2" Orientation="Horizontal">
-                            <TextBox Width="400" Height="90" AcceptsReturn="True" Text="{Binding Subscription}" TextWrapping="Wrap" ToolTip="{x:Static res:Strings.PACInstruction}"/>
-                        </WrapPanel>
-                    </Grid>
+                    <Label Grid.Row="0" Content="{x:Static res:Strings.Bypass}"/>
+                    <TextBox Grid.Row="2" MinHeight="90"  AcceptsReturn="True" Text="{Binding Bypass}" TextWrapping="Wrap" ToolTip="{x:Static res:Strings.BypassInstruction}" />
                 </Grid>
-                <Grid Grid.Column="2">
-                    <GroupBox  Width="180"  Padding="{adonisUi:Space 2, 1.5}">
-                        <Grid>
-                            <StackPanel>
-                                <Label  Content="Core"/>
-                                <TextBlock x:Name="TextBlockCoreVersion" TextWrapping="WrapWithOverflow"/>
-                                <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
-                                <Label Grid.Row="0" Content="{x:Static res:Strings.Mode}"/>
-                                <TextBlock x:Name="TextBlockMode" TextWrapping="WrapWithOverflow"/>
-                                <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
-                                <Label  Content="{x:Static res:Strings.Outbounds}"/>
-                                <TextBlock x:Name="TextBlockOutBounds" TextWrapping="WrapWithOverflow"/>
-                                <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
-                                <Label  Content="{x:Static res:Strings.Rules}"/>
-                                <TextBlock x:Name="TextBlockRoute" TextWrapping="WrapWithOverflow"/>
-                                <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
-                                <Label  Content="{x:Static res:Strings.loglevel}"/>
-                                <TextBlock x:Name="TextBlockLogLevel" TextWrapping="WrapWithOverflow"/>
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
+                <Grid Grid.Row="8" Grid.ColumnSpan="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="{adonisUi:Space 1}" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Content="{x:Static res:Strings.Subscription}" />
+                    <TextBox Grid.Row="2"  MinHeight="90"  AcceptsReturn="True" Text="{Binding Subscription}" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" ToolTip="{x:Static res:Strings.PACInstruction}"/>
                 </Grid>
+                <GroupBox Grid.Column="4" Grid.RowSpan="10">
+                    <Grid>
+                        <StackPanel>
+                            <Label  Content="Core"/>
+                            <TextBlock x:Name="TextBlockCoreVersion" TextWrapping="WrapWithOverflow"/>
+                            <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
+                            <Label Grid.Row="0" Content="{x:Static res:Strings.Mode}"/>
+                            <TextBlock x:Name="TextBlockMode" TextWrapping="WrapWithOverflow"/>
+                            <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
+                            <Label  Content="{x:Static res:Strings.Outbounds}"/>
+                            <TextBlock x:Name="TextBlockOutBounds" TextWrapping="WrapWithOverflow"/>
+                            <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
+                            <Label  Content="{x:Static res:Strings.Rules}"/>
+                            <TextBlock x:Name="TextBlockRoute" TextWrapping="WrapWithOverflow"/>
+                            <Separator Margin="{adonisUi:Space 0, 2, 0, 2}"/>
+                            <Label  Content="{x:Static res:Strings.loglevel}"/>
+                            <TextBlock x:Name="TextBlockLogLevel" TextWrapping="WrapWithOverflow"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
             </Grid>
-            
         </Grid>
     </ScrollViewer>
 </Page>

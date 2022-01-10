@@ -7,91 +7,89 @@
       xmlns:sys="clr-namespace:System;assembly=mscorlib" 
       xmlns:res="clr-namespace:Scream.Resources"
       mc:Ignorable="d" d:DesignHeight="500" d:DesignWidth="600" Title="{x:Static res:Strings.Outbounds}">
-    <ScrollViewer>
-        <Grid Margin="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="{adonisUi:Space 2}" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Label Content="{x:Static res:Strings.Outbounds}" FontSize="18" />
-            <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="{adonisUi:Space 2}" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" x:Name="stackpanel_serverlist">
-                    <ListBox Name="ListBoxOutbounds" Width="212" Height="{Binding ElementName=stackpanel_serverlist,Path=ActualHeight}" SelectionMode="Extended" VirtualizingStackPanel.VirtualizationMode="Recycling">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,10,0,10">
-                                    <TextBlock Text="{Binding Protocol}" Foreground="#CCC" />
-                                    <TextBlock Text="{Binding Tag}" Width="180" TextWrapping="WrapWithOverflow" FontSize="14" FontFamily="Yu Gothic UI Semibold" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-                <StackPanel Grid.Column="2" x:Name="stackpanel_json">
-                    <TextBox x:Name="TextBoxJson" Text="{Binding OutboundJson}" AcceptsReturn="True" TextWrapping="WrapWithOverflow" VerticalScrollBarVisibility="Auto" AcceptsTab="True" Width="358" Height="{Binding ElementName=stackpanel_json,Path=ActualHeight}" />
-                </StackPanel>
+    <Grid Margin="0" x:Name="gd">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="{adonisUi:Space 1}" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Label Content="{x:Static res:Strings.Outbounds}" FontSize="18" />
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{adonisUi:Space 2}" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <ListBox Grid.Column="0" Name="ListBoxOutbounds"  SelectionMode="Extended" VirtualizingStackPanel.VirtualizationMode="Recycling">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,10,0,10">
+                                <TextBlock Text="{Binding Protocol}" Foreground="#CCC" />
+                                <TextBlock Text="{Binding Tag}" TextWrapping="Wrap" FontSize="14" FontFamily="Yu Gothic UI Semibold" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
-            <WrapPanel HorizontalAlignment="Right">
-                <Button x:Name="ButtonImportExport" Content="{x:Static res:Strings.ImportExport}" Margin="{adonisUi:Space 0, 0, 3, 0}">
-                    <Button.ContextMenu>
-                        <ContextMenu x:Name="ContextMenuImport" PlacementRectangle="{Binding RelativeSource={RelativeSource Self}}">
-                            <MenuItem x:Name="ImportClipboard" Header="{x:Static res:Strings.ImportClipboard}" Click="Import_Click" />
-                            <MenuItem x:Name="ImportSubscription" Header="{x:Static res:Strings.ImportSubscription}" Click="Import_Click" />
-                            <Separator/>
-                            <MenuItem x:Name="ExportClipboard" Header="{x:Static res:Strings.ExportClipboard}" Click="Export_Click" />
-                        </ContextMenu>
-                    </Button.ContextMenu>
-                    <Button.Triggers>
-                        <EventTrigger SourceName="ButtonImportExport" RoutedEvent="Button.Click">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContextMenuImport" Storyboard.TargetProperty="(ContextMenu.IsOpen)">
-                                        <DiscreteObjectKeyFrame KeyTime="0:0:0">
-                                            <DiscreteObjectKeyFrame.Value>
-                                                <sys:Boolean>True</sys:Boolean>
-                                            </DiscreteObjectKeyFrame.Value>
-                                        </DiscreteObjectKeyFrame>
-                                    </ObjectAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Button.Triggers>
-                </Button>
-                <Button x:Name="ButtonNew" Content="{x:Static res:Strings.Add}" Margin="{adonisUi:Space 0, 0, 3, 0}">
-                    <Button.ContextMenu>
-                        <ContextMenu x:Name="ContextMenuNew" PlacementRectangle="{Binding RelativeSource={RelativeSource Self}}">
-                            <MenuItem x:Name="MenuVmess" Header="VMESS" Click="MenuItem_Click" />
-                            <MenuItem x:Name="MenuVless" Header="VLESS" Click="MenuItem_Click" />
-                            <MenuItem x:Name="MenuTrojan" Header="Trojan" Click="MenuItem_Click" />
-                            <MenuItem x:Name="MenuShadowsocks" Header="ShadowSocks" Click="MenuItem_Click" />
-                            <MenuItem x:Name="MenuOthers" Header="Others" Click="MenuItem_Click" />
-                        </ContextMenu>
-                    </Button.ContextMenu>
-                    <Button.Triggers>
-                        <EventTrigger SourceName="ButtonNew" RoutedEvent="Button.Click">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContextMenuNew" Storyboard.TargetProperty="(ContextMenu.IsOpen)">
-                                        <DiscreteObjectKeyFrame KeyTime="0:0:0">
-                                            <DiscreteObjectKeyFrame.Value>
-                                                <sys:Boolean>True</sys:Boolean>
-                                            </DiscreteObjectKeyFrame.Value>
-                                        </DiscreteObjectKeyFrame>
-                                    </ObjectAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Button.Triggers>
-                </Button>
-                <Button x:Name="ButtonDelete" Content="{x:Static res:Strings.Remove}" Margin="{adonisUi:Space 0, 0, 3, 0}" Click="Button_Click" />
-                <Button x:Name="ButtonSave" Content="{x:Static res:Strings.Save}" Margin="{adonisUi:Space 0}" Click="Button_Click" />
-            </WrapPanel>
+            <Grid Grid.Column="2">
+                <TextBox x:Name="TextBoxJson" Text="{Binding OutboundJson}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" AcceptsTab="True" VerticalContentAlignment="Top"  />
+            </Grid>
         </Grid>
-    </ScrollViewer>
+        <WrapPanel HorizontalAlignment="Right">
+            <Button x:Name="ButtonImportExport" Content="{x:Static res:Strings.ImportExport}" Margin="{adonisUi:Space 0, 0, 3, 0}">
+                <Button.ContextMenu>
+                    <ContextMenu x:Name="ContextMenuImport" PlacementRectangle="{Binding RelativeSource={RelativeSource Self}}">
+                        <MenuItem x:Name="ImportClipboard" Header="{x:Static res:Strings.ImportClipboard}" Click="Import_Click" />
+                        <MenuItem x:Name="ImportSubscription" Header="{x:Static res:Strings.ImportSubscription}" Click="Import_Click" />
+                        <Separator/>
+                        <MenuItem x:Name="ExportClipboard" Header="{x:Static res:Strings.ExportClipboard}" Click="Export_Click" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+                <Button.Triggers>
+                    <EventTrigger SourceName="ButtonImportExport" RoutedEvent="Button.Click">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContextMenuImport" Storyboard.TargetProperty="(ContextMenu.IsOpen)">
+                                    <DiscreteObjectKeyFrame KeyTime="0:0:0">
+                                        <DiscreteObjectKeyFrame.Value>
+                                            <sys:Boolean>True</sys:Boolean>
+                                        </DiscreteObjectKeyFrame.Value>
+                                    </DiscreteObjectKeyFrame>
+                                </ObjectAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Button.Triggers>
+            </Button>
+            <Button x:Name="ButtonNew" Content="{x:Static res:Strings.Add}" Margin="{adonisUi:Space 0, 0, 3, 0}">
+                <Button.ContextMenu>
+                    <ContextMenu x:Name="ContextMenuNew" PlacementRectangle="{Binding RelativeSource={RelativeSource Self}}">
+                        <MenuItem x:Name="MenuVmess" Header="VMESS" Click="MenuItem_Click" />
+                        <MenuItem x:Name="MenuVless" Header="VLESS" Click="MenuItem_Click" />
+                        <MenuItem x:Name="MenuTrojan" Header="Trojan" Click="MenuItem_Click" />
+                        <MenuItem x:Name="MenuShadowsocks" Header="ShadowSocks" Click="MenuItem_Click" />
+                        <MenuItem x:Name="MenuOthers" Header="Others" Click="MenuItem_Click" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+                <Button.Triggers>
+                    <EventTrigger SourceName="ButtonNew" RoutedEvent="Button.Click">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContextMenuNew" Storyboard.TargetProperty="(ContextMenu.IsOpen)">
+                                    <DiscreteObjectKeyFrame KeyTime="0:0:0">
+                                        <DiscreteObjectKeyFrame.Value>
+                                            <sys:Boolean>True</sys:Boolean>
+                                        </DiscreteObjectKeyFrame.Value>
+                                    </DiscreteObjectKeyFrame>
+                                </ObjectAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Button.Triggers>
+            </Button>
+            <Button x:Name="ButtonDelete" Content="{x:Static res:Strings.Remove}" Margin="{adonisUi:Space 0, 0, 3, 0}" Click="Button_Click" />
+            <Button x:Name="ButtonSave" Content="{x:Static res:Strings.Save}" Margin="{adonisUi:Space 0}" Click="Button_Click" />
+        </WrapPanel>
+    </Grid>
 </Page>

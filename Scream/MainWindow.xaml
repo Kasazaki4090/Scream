@@ -5,8 +5,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Scream" xmlns:res="clr-namespace:Scream.Resources" 
-        xmlns:tb="http://www.hardcodet.net/taskbar" mc:Ignorable="d" ResizeMode="CanMinimize"
+        xmlns:res="clr-namespace:Scream.Resources" 
+        xmlns:tb="http://www.hardcodet.net/taskbar" mc:Ignorable="d" 
         PlaceTitleBarOverContent="True" WindowStartupLocation="CenterScreen" Title="Scream" Height="500" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
