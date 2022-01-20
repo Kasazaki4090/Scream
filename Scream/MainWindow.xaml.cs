@@ -1428,7 +1428,7 @@ namespace Scream
             Toggle.DataContext = null;
             ExtUtils.FlushMemory();
         }
-        private void QuitScream(object sender, RoutedEventArgs e)
+        public void QuitScream(object sender, RoutedEventArgs e)
         {
             notifyIcon.Icon = null;
             this.UnloadV2ray();
