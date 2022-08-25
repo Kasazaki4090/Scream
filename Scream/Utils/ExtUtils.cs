@@ -7,6 +7,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Windows;
+using IWshRuntimeLibrary;
+using System.Collections.Generic;
 
 namespace Scream
 {
@@ -201,58 +203,6 @@ namespace Scream
 
 
         /// <summary>
-        /// autostart ,set
-        /// </summary>
-        /// <param name="enabled"></param>
-        /// <returns></returns>
-        public static bool AutoStartSet(bool enabled)
-        {
-            try
-            {
-                string applicationPath = System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase + System.AppDomain.CurrentDomain.SetupInformation.ApplicationName;
-                RegistryKey runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
-                if (enabled)
-                {
-                    runKey.SetValue("Scream", applicationPath);
-                }
-                else
-                {
-                    runKey.DeleteValue("Scream");
-                }
-                runKey.Close();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// autostart ,check
-        /// </summary>
-        /// <returns></returns>
-        public static bool AutoStartCheck()
-        {
-            try
-            {
-                RegistryKey runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
-                string[] runList = runKey.GetValueNames();
-                runKey.Close();
-                foreach (string item in runList)
-                {
-                    if (item.Equals("Scream"))
-                        return true;
-                }
-                return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
         /// json key to lower
         /// </summary>
         /// <param name="jsonObject"></param>
@@ -275,5 +225,160 @@ namespace Scream
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
+
+        #region Set autostart
+        //https://blog.csdn.net/liyu3519/article/details/81257839
+
+        private const string QuickName = "Scream";
+
+        /// <summary>
+        /// Get the system autostart directory
+        /// </summary>
+        private string SystemStartPath { get { return Environment.GetFolderPath(Environment.SpecialFolder.Startup); } }
+
+        /// <summary>
+        /// Get the full path to the program
+        /// </summary>
+        private string GetappAllPath(){ return Process.GetCurrentProcess().MainModule.FileName; }
+        /// <summary>
+        /// Get desktop directory 
+        /// </summary>
+        private string DesktopPath { get { return Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory); } }
+
+        /// <summary>
+        /// Set boot up automatically
+        /// </summary>
+        public void SetMeAutoStart(bool onOff = true)
+        {
+            if (onOff)
+            {
+                List<string> shortcutPaths = GetQuickFromFolder(SystemStartPath, GetappAllPath());
+                if (shortcutPaths.Count >= 2)
+                {
+                    for (int i = 1; i < shortcutPaths.Count; i++)
+                    {
+                        DeleteFile(shortcutPaths[i]);
+                    }
+                }
+                else if (shortcutPaths.Count < 1)
+                {
+                    CreateShortcut(SystemStartPath, QuickName, GetappAllPath(), "GUI for v2ray-core&xray-core on Windows");
+                }
+            }
+            else
+            {
+                List<string> shortcutPaths = GetQuickFromFolder(SystemStartPath, GetappAllPath());
+                if (shortcutPaths.Count > 0)
+                {
+                    for (int i = 0; i < shortcutPaths.Count; i++)
+                    {
+                        DeleteFile(shortcutPaths[i]);
+                    }
+                }
+            }
+            //CreateDesktopQuick(desktopPath, QuickName, appAllPath);
+        }
+
+        /// <summary>
+        ///  Create a shortcut to the target path for the specified file
+        /// </summary>
+        private bool CreateShortcut(string directory, string shortcutName, string targetPath, string description = null, string iconLocation = null)
+        {
+            try
+            {
+                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+                // Com - Windows Script Host Object Model
+                string shortcutPath = Path.Combine(directory, string.Format("{0}.lnk", shortcutName));
+                WshShell shell = new IWshRuntimeLibrary.WshShell();
+                IWshShortcut shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutPath);
+                shortcut.TargetPath = targetPath;                                                               
+                shortcut.WorkingDirectory = Path.GetDirectoryName(targetPath);                                  
+                shortcut.WindowStyle = 1;                                                                       
+                shortcut.Description = description;
+                shortcut.IconLocation = string.IsNullOrWhiteSpace(iconLocation) ? targetPath : iconLocation;
+                shortcut.Save();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                string temp = ex.Message;
+                temp = "";
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Get the set of shortcut paths of the specified application in the specified folder
+        /// </summary>
+        private List<string> GetQuickFromFolder(string directory, string targetPath)
+        {
+            List<string> tempStrs = new List<string>();
+            tempStrs.Clear();
+            string tempStr = null;
+            string[] files = Directory.GetFiles(directory, "*.lnk");
+            if (files == null || files.Length < 1)
+            {
+                return tempStrs;
+            }
+            for (int i = 0; i < files.Length; i++)
+            {
+                //files[i] = string.Format("{0}\\{1}", directory, files[i]);
+                tempStr = GetAppPathFromQuick(files[i]);
+                if (tempStr == targetPath)
+                {
+                    tempStrs.Add(files[i]);
+                }
+            }
+            return tempStrs;
+        }
+
+        /// <summary>
+        /// Get the target file path of the shortcut - used to determine whether autostart has been enabled
+        /// </summary>
+        /// <param name="shortcutPath"></param>
+        /// <returns></returns>
+        private string GetAppPathFromQuick(string shortcutPath)
+        {
+            //Path to shortcut file = @"d:\Test.lnk";
+            if (System.IO.File.Exists(shortcutPath))
+            {
+                WshShell shell = new WshShell();
+                IWshShortcut shortct = (IWshShortcut)shell.CreateShortcut(shortcutPath);
+                return shortct.TargetPath;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Delete files by path - shortcut for removing programs from the computer's self-start directory when you cancel the self-start
+        /// </summary>
+        private void DeleteFile(string path)
+        {
+            FileAttributes attr = System.IO.File.GetAttributes(path);
+            if (attr == FileAttributes.Directory)
+            {
+                Directory.Delete(path, true);
+            }
+            else
+            {
+                System.IO.File.Delete(path);
+            }
+        }
+
+        /// <summary>
+        /// Create a shortcut on the desktop
+        /// </summary>
+        public void CreateDesktopQuick(string desktopPath = "", string quickName = "", string appPath = "")
+        {
+            List<string> shortcutPaths = GetQuickFromFolder(desktopPath, appPath);
+            if (shortcutPaths.Count < 1)
+            {
+                CreateShortcut(desktopPath, quickName, appPath, "app descripton");
+            }
+        }
+        #endregion
     }
 }

@@ -53,6 +53,7 @@ namespace Scream
         public string dnsString = "localhost";
         public string bypass = "< local >; localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*;localhost.ptlogin2.qq.com";
         public bool colorscheme = false;
+        public bool autoStart = false;
 
         public List<Dictionary<string, object>> profiles = new List<Dictionary<string, object>>();
         public List<Dictionary<string, object>> subsOutbounds = new List<Dictionary<string, object>>();
@@ -196,7 +197,7 @@ namespace Scream
             }
             if (sender == ToggleAutoStart)
             {
-                ExtUtils.AutoStartSet((bool)ToggleAutoStart.IsChecked);
+                autoStart = toggle.AutoStart;
             }
             if (sender == ToggleColorScheme)
             {
@@ -340,6 +341,7 @@ namespace Scream
                     "appStatus",
                     new Dictionary<string, object>
                     {
+                        { "autoStart", autoStart },
                         { "proxyState", proxyState },
                         { "proxyMode", proxyMode },
                         { "selectedServerIndex", selectedServerIndex },
@@ -396,6 +398,7 @@ namespace Scream
                 dynamic settings = javaScriptSerializer.Deserialize<dynamic>(settingString);
                 try
                 {
+                    autoStart = settings["appStatus"]["autoStart"];
                     proxyState = settings["appStatus"]["proxyState"];
                     proxyMode = (ProxyMode)settings["appStatus"]["proxyMode"];
                     selectedServerIndex = settings["appStatus"]["selectedServerIndex"];
@@ -1447,6 +1450,15 @@ namespace Scream
             pacFileWatcher.EnableRaisingEvents = false;
             cusFileWatcher.EnableRaisingEvents = false;
             confdirFileWatcher.EnableRaisingEvents = false;
+            ExtUtils ext = new ExtUtils();
+            if (autoStart)
+            {
+                ext.SetMeAutoStart();
+            }
+            else
+            {
+                ext.SetMeAutoStart(false);
+            }
             Application.Current.Shutdown();
         }
         private void ShowHelp(object sender, RoutedEventArgs e)
@@ -1464,7 +1476,7 @@ namespace Scream
 
             Toggle.DataContext = toggle;
             toggle.ColorScheme = colorscheme;
-            toggle.AutoStart = ExtUtils.AutoStartCheck();
+            toggle.AutoStart = autoStart;
             toggle.UDPSupport = udpSupport;
             toggle.ShareOverLan = shareOverLan;
             ResourceLocator.SetColorScheme(Application.Current.Resources, !toggle.ColorScheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
