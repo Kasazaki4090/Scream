@@ -29,7 +29,7 @@ namespace Scream
             grid.SOCKS5 = mainWindow.localPort;
             grid.LogLevelIndex = Utilities.LOG_LEVEL_LIST.FindIndex(x => x == mainWindow.logLevel);
             grid.DNS = mainWindow.dnsString;
-            grid.Bypass = mainWindow.bypass;
+            grid.Bypass = mainWindow.byPass;
             grid.Subscription = String.Join("\n", mainWindow.subscriptionUrl);
             TextBlockCoreVersion.Text = Utilities.corePath;
             TextBlockMode.Text = Utilities.ProxyMode_LIST[(int)mainWindow.proxyMode];
@@ -71,7 +71,7 @@ namespace Scream
             mainWindow.localPort = grid.SOCKS5;
             mainWindow.logLevel = Utilities.LOG_LEVEL_LIST[grid.LogLevelIndex];
             mainWindow.dnsString = grid.DNS;
-            mainWindow.bypass = grid.Bypass;
+            mainWindow.byPass = grid.Bypass;
             mainWindow.subscriptionUrl = grid.Subscription.Split(new[] { '\r', '\n' }).Select(line => line.Trim()).Where(line => line.Length > 0).ToList();
         }
     }

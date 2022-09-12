@@ -44,9 +44,9 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.6.2"
+          automatic_release_tag: "v1.7.0"
           prerelease: false
-          title: "v1.6.2"
+          title: "v1.7.0"
           files:  |
             Scream.zip
      

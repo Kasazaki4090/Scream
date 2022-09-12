@@ -51,8 +51,9 @@ namespace Scream
         public int selectedRoutingSet = 0;
         public string selectedPacFileName = "pac.js";
         public string dnsString = "localhost";
-        public string bypass = "< local >; localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*;localhost.ptlogin2.qq.com";
-        public bool colorscheme = false;
+        public string byPass = "< local >; localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*;localhost.ptlogin2.qq.com";
+        public bool colorScheme = false;
+        public bool autoStart = false;
 
         public List<Dictionary<string, object>> profiles = new List<Dictionary<string, object>>();
         public List<Dictionary<string, object>> subsOutbounds = new List<Dictionary<string, object>>();
@@ -196,11 +197,11 @@ namespace Scream
             }
             if (sender == ToggleAutoStart)
             {
-                ExtUtils.AutoStartSet((bool)ToggleAutoStart.IsChecked);
+                autoStart = toggle.AutoStart;
             }
             if (sender == ToggleColorScheme)
             {
-                colorscheme = toggle.ColorScheme;
+                colorScheme = toggle.ColorScheme;
                 ResourceLocator.SetColorScheme(Application.Current.Resources, !toggle.ColorScheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
                 mainMenu.UpdateDefaultStyle();
             }
@@ -340,6 +341,8 @@ namespace Scream
                     "appStatus",
                     new Dictionary<string, object>
                     {
+                        { "autoStart", autoStart },
+                        { "colorScheme", colorScheme },
                         { "proxyState", proxyState },
                         { "proxyMode", proxyMode },
                         { "selectedServerIndex", selectedServerIndex },
@@ -357,9 +360,9 @@ namespace Scream
                         { "index", selectedPartServerIndex }
                     }
                 },
-                { "bypass", bypass },
+                { "byPass", byPass },
                 {
-                    "subscriptions",
+                    "subScriptions",
                     new Dictionary<string, object>
                     {
                         { "url", subscriptionUrl },
@@ -367,7 +370,6 @@ namespace Scream
                     }
                 },
                 { "selectedPacFileName", selectedPacFileName },
-                { "colorscheme", colorscheme },
                 { "logLevel", logLevel },
                 { "localPort", localPort },
                 { "httpPort", httpPort },
@@ -396,6 +398,8 @@ namespace Scream
                 dynamic settings = javaScriptSerializer.Deserialize<dynamic>(settingString);
                 try
                 {
+                    autoStart = settings["appStatus"]["autoStart"];
+                    colorScheme = settings["appStatus"]["colorScheme"];
                     proxyState = settings["appStatus"]["proxyState"];
                     proxyMode = (ProxyMode)settings["appStatus"]["proxyMode"];
                     selectedServerIndex = settings["appStatus"]["selectedServerIndex"];
@@ -406,7 +410,7 @@ namespace Scream
                     useCusProfile = settings["appStatus"]["useCusProfile"];
 
                     selectedPacFileName = settings["selectedPacFileName"];
-                    colorscheme = settings["colorscheme"];
+                    
                     logLevel = settings["logLevel"];
                     localPort = (int)settings["localPort"];
                     httpPort = (int)settings["httpPort"];
@@ -419,12 +423,12 @@ namespace Scream
                     {
                         selectedPartServerIndex.Add((int)index);
                     }
-                    bypass = settings["bypass"];
-                    foreach (string url in settings["subscriptions"]["url"])
+                    byPass = settings["byPass"];
+                    foreach (string url in settings["subScriptions"]["url"])
                     {
                         subscriptionUrl.Add(url);
                     }
-                    foreach (string tag in settings["subscriptions"]["tag"])
+                    foreach (string tag in settings["subScriptions"]["tag"])
                     {
                         subscriptionTag.Add(tag);
                     }
@@ -1113,7 +1117,7 @@ namespace Scream
                 registry.SetValue("ProxyEnable", 1);
                 string proxyServer = $"http://127.0.0.1:{httpPort}";
                 registry.SetValue("ProxyServer", proxyServer);
-                registry.SetValue("ProxyOverride", bypass);
+                registry.SetValue("ProxyOverride", byPass);
                 registry.DeleteValue("AutoConfigURL", false);
             }
             InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
@@ -1447,6 +1451,15 @@ namespace Scream
             pacFileWatcher.EnableRaisingEvents = false;
             cusFileWatcher.EnableRaisingEvents = false;
             confdirFileWatcher.EnableRaisingEvents = false;
+            ExtUtils ext = new ExtUtils();
+            if (autoStart)
+            {
+                ext.SetMeAutoStart();
+            }
+            else
+            {
+                ext.SetMeAutoStart(false);
+            }
             Application.Current.Shutdown();
         }
         private void ShowHelp(object sender, RoutedEventArgs e)
@@ -1463,8 +1476,8 @@ namespace Scream
             Major.SelectedIndex = 0;
 
             Toggle.DataContext = toggle;
-            toggle.ColorScheme = colorscheme;
-            toggle.AutoStart = ExtUtils.AutoStartCheck();
+            toggle.ColorScheme = colorScheme;
+            toggle.AutoStart = autoStart;
             toggle.UDPSupport = udpSupport;
             toggle.ShareOverLan = shareOverLan;
             ResourceLocator.SetColorScheme(Application.Current.Resources, !toggle.ColorScheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
